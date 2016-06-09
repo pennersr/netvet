@@ -116,6 +116,19 @@ class URL(Checker):
                         title=title))
         return self
 
+    def matches_mimetype(self, mimetype):
+        """
+        Checks that the `Content-Type` header matches the provided mimetype.
+        """
+        with rule('Checking that {url} mimetype matches {mimetype}'.format(
+                url=self.url,
+                mimetype=mimetype)) as outcome:
+            response = self._fetch()
+            content_type = response.headers.get('Content-Type', '')
+            if mimetype != content_type:
+                outcome.fail('got {content_type}'.format(content_type))
+        return self
+
     def check_response(self, func):
         with rule(
                 'Checking that {url} passes {func}'.format(
