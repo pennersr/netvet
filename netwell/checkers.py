@@ -123,6 +123,7 @@ class URL(Checker):
                     func=func.__name__)) as outcome:
             response = self._fetch()
             func(response, outcome)
+        return self
 
     def _get_netloc_port(self):
         parts = urlparse(self.url)
