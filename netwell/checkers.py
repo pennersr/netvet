@@ -20,6 +20,8 @@ class Output:
         self.quiet = False
         self.line = ''
         self.line_error = False
+        self.total_checks = 0
+        self.failed_checks = 0
 
     def info(self, text):
         if not self.quiet or self.line_error:
@@ -38,6 +40,22 @@ class Output:
         self.info('\n')
         self.line_error = False
         self.line = ''
+
+    @property
+    def return_code(self):
+        """ Get the return code for the summary if you want
+        to use the command result code in external software.
+        """
+        return self.failed_checks
+
+    def summary(self):
+        """ Prints a summary of the checks performed. """
+        self.info('CHECKS={checks}, OK={success}, FAILED={failed}'.format(
+            checks=self.total_checks,
+            success=self.total_checks - self.failed_checks,
+            failed=self.failed_checks
+        ))
+        self.eol()
 
 
 output = Output()
@@ -62,11 +80,13 @@ class Outcome:
     def fail(self, message=None):
         self.message = message
         self.failed = True
+        output.failed_checks += 1
         raise RuleFailedException()
 
 
 @contextmanager
 def rule(description):
+    output.total_checks += 1
     output.info(description + '... ')
     outcome = Outcome()
     try:
