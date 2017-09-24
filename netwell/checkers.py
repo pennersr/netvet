@@ -151,6 +151,34 @@ class URL(Checker):
                     outcome.fail('not found')
         return self
 
+    def has_response_text(self, text):
+        """
+        Checks if the specified text is present in the response body.
+        """
+        with rule(
+                'Checking that {url} response contains {text}'.format(
+                    url=self.url,
+                    text=text)) as outcome:
+
+                    response = self._fetch()
+                    if text not in response.text:
+                        outcome.fail('not found')
+        return self
+    
+    def has_not_response_text(self, text):
+        """
+        Checks if the specified text is not present in the response body.
+        """
+        with rule(
+                'Checking that {url} response does not contains {text}'.format(
+                    url=self.url,
+                    text=text)) as outcome:
+
+                    response = self._fetch()
+                    if text in response.text:
+                        outcome.fail('text found')
+        return self
+
     def check_response(self, func):
         with rule(
                 'Checking that {url} passes {func}'.format(
