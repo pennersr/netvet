@@ -93,34 +93,35 @@ class Checker:
     pass
 
 
-class NetwellResponse:
-    def __init__(self, response, url):
-        self._response = response
-        self._url = url
+class NetwellResponseWrapper:
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __getattr__(self, name):
+        return getattr(self.obj, name)
 
     def contains(self, text):
         with rule(
             'Checking that {url} response contains {text}'.format(
-                url=self._url,
+                url=self.url,
                 text=text)) as outcome:
-            if text not in self._response.text:
+            if text not in self.text:
                 outcome.fail('not found')
 
     def not_contains(self, text):
         with rule(
             'Checking that {url} response is without {text}'.format(
-                url=self._url,
+                url=self.url,
                 text=text)) as outcome:
-            if text in self._response.text:
+            if text in self.text:
                 outcome.fail('found')
 
     def check(self, func):
         with rule(
                 'Checking that {url} passes {func}'.format(
-                    url=self._url,
+                    url=self.url,
                     func=func.__name__)) as outcome:
-            response = self._response
-            func(response, outcome)
+            func(self, outcome)
         return self
 
 
@@ -132,13 +133,12 @@ class URL(Checker):
 
     def _fetch(self):
         if not self._response:
-            self._response = NetwellResponse(
-                requests.get(self.url, timeout=10),
-                self.url)
+            self._response = NetwellResponseWrapper(
+                requests.get(self.url, timeout=10))
+
         return self._response
 
-    def response(self):
-        return self._fetch()
+    response = property(_fetch)
 
     def redirects_to(self, to_url):
         with rule(
