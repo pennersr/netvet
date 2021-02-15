@@ -30,7 +30,8 @@ Quickstart
 ==========
 
 Given a netwell checkup file `checks.py`:
-::
+
+.. code-block:: python
 
     from netwell.checkers import URL, DNS, Port, Repo, Path
 
